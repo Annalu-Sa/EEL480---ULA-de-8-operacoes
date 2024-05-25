@@ -124,99 +124,306 @@ begin
 	result_out(1) <= soma(1);
 	result_out(2) <= soma(2);
 	result_out(3) <= soma(3);
-  ELSIF op_in = "001" THEN
-  --Portanto atribuimos o valor 001 a subtracao.
-	result_out(0) <= subtrai(0);
-	result_out(1) <= subtrai(1);
-	result_out(2) <= subtrai(2);
-	result_out(3) <= subtrai(3);
-	--Portanto atribuimos o valor 010 a operacao logica and.
-  ELSIF op_in = "010" THEN
-   result_out(0) <= func_and(0);
-	result_out(1) <= func_and(1);
-	result_out(2) <= func_and(2);
-	result_out(3) <= func_and(3);
-	--Portanto atribuimos o valor 011 a operacao logica nand.
-  ELSIF op_in = "011" THEN
-   result_out(0) <= func_nand(0);
-	result_out(1) <= func_nand(1);
-	result_out(2) <= func_nand(2);
-	result_out(3) <= func_nand(3);
-	--Portanto atribuimos o valor 100 a operacao logica or.
-  ELSIF op_in = "100" THEN
-   result_out(0) <= func_or(0);
-	result_out(1) <= func_or(1);
-	result_out(2) <= func_or(2);
-	result_out(3) <= func_or(3);
-	--Portanto atribuimos o valor 101 a operacao logica nor.
-  ELSIF op_in = "101" THEN
-   result_out(0) <= func_nor(0);
-	result_out(1) <= func_nor(1);
-	result_out(2) <= func_nor(2);
-	result_out(3) <= func_nor(3);
-	--Portanto atribuimos o valor 110 a operacao logica xor.
-  ELSIF op_in = "110" THEN
-  result_out(0) <= func_xor(0);
-  result_out(1) <= func_xor(1);
-  result_out(2) <= func_xor(2);
-  result_out(3) <= func_xor(3);
-  --Portanto atribuimos o valor 111 a operacao logica xnor.
-  ELSE 
-  result_out(0) <= func_xnor(0);
-  result_out(1) <= func_xnor(1);
-  result_out(2) <= func_xnor(2);
-  result_out(3) <= func_xnor(3);
-  END IF;
-  
-  -- Nesta etapa definimos as instrucoes para que o circuito identifique cada uma das flags. 
+	flags_out(1) <= '0';
+	
+	-- Nesta etapa definimos as instrucoes para que o circuito identifique cada uma das flags. 
   
   -- Flag Zero ------------------------------------------
-  -- Se nosso resultado for "0000" tanto da soma quanto da subtracao, nosso flag zero sinaliza.
-    IF soma = "00000"  OR subtrai = "00000" THEN
-    flags_out(3) <= '1';
+  -- Se nosso resultado for "0000" nosso flag zero sinaliza.
+    IF soma = "00000" THEN
+    flags_out(0) <= '1';
     ELSE 
-    flags_out(3) <= '0';
+    flags_out(0) <= '0';
     END IF;
 -- Flag Zero ------------------------------------------
-
--- Flag Negativo --------------------------------------
--- Se a nossa entrada a_in( que seria nosso minuendo) for maior que nosso b_in ( nosso subtraendo) entao temos 
--- um valor negativo na nossa saida, sendo assim nosso flag negativo sinaliza.
-    IF (a_in < b_in) AND (op_in = "001") THEN
-    flags_out(2) <= '1';
-    ELSE
-    flags_out(2) <= '0';
-    END IF; 
--- Flag Negativo --------------------------------------
 
 -- Flag Overflow --------------------------------------
 -- Este flag acontece quando nossa entrada nao consegue ser representada corretamente no nosso vetor de saida. 
 -- Para a soma de 4 bits a soma acontece na mesma frequencia em que se ocorre o carry_out, entao podemos 
 -- utilizar nosso quinto bit para identificar igualmente os dois. 
 
--- Para a subtracao temos mais casos ja que nossos numeros estao em complemento de 2, entao para identificar 
--- overflow utilizamos a seguinte logica : Nosso a_in(minuendo) nunca pode ser maior que nosso resultado 
--- ja que ele esta sendo subtraido por b_in(subtraendo), nesse caso conseguimos cobrir todos os casos de overflow
--- satisfazendo os resultados esperados e sinalizando corretamente. 
-
-    IF (op_in = "000" and soma(4) = '1') or (op_in = "001" and subtrai(3 downto 0) > a_in) THEN  -- Adição
-            flags_out(1) <= '1';
+    IF soma(4) = '1' THEN  -- Adição
+            flags_out(3) <= '1';
     ELSE
-            flags_out(1) <= '0';
+            flags_out(3) <= '0';
     END IF;
-
 
 -- Flag Overflow --------------------------------------
 
 -- Flag Carry out --------------------------------------
 -- Carry out acontece quando nosso valor excede o numero de bits de saida, portanto utilizaremos o quinto
 -- bit do sinal que carrega o resultado para identifica-lo e entao sinaliza-lo.
-  IF soma(4) ='1' OR subtrai(4) = '1' THEN 
-    flags_out(0) <= soma(4);
+  IF soma(4) ='1' THEN 
+    flags_out(2) <= soma(4);
   ELSE 
-    flags_out(0) <= '0';
+    flags_out(2) <= '0';
   END IF;
 -- Flag Carry out --------------------------------------  
+
+  ELSIF op_in = "001" THEN
+  --Portanto atribuimos o valor 001 a subtracao.
+	result_out(0) <= subtrai(0);
+	result_out(1) <= subtrai(1);
+	result_out(2) <= subtrai(2);
+	result_out(3) <= subtrai(3);
+	
+-- Flag Zero ------------------------------------------
+  -- Se nosso resultado for "0000"nosso flag zero sinaliza.
+    IF subtrai = "00000" THEN
+    flags_out(0) <= '1';
+    ELSE 
+    flags_out(0) <= '0';
+    END IF;
+-- Flag Zero ------------------------------------------
+
+-- Flag Negativo --------------------------------------
+-- Se a nossa entrada a_in( que seria nosso minuendo) for maior que nosso b_in ( nosso subtraendo) entao temos 
+-- um valor negativo na nossa saida, sendo assim nosso flag negativo sinaliza.
+    IF (a_in < b_in) THEN
+    flags_out(1) <= '1';
+    ELSE
+    flags_out(1) <= '0';
+    END IF; 
+-- Flag Negativo -------------------------------------- 
+	 
+-- Para a subtracao temos mais casos ja que nossos numeros estao em complemento de 2, entao para identificar 
+-- overflow utilizamos a seguinte logica : Nosso a_in(minuendo) nunca pode ser maior que nosso resultado 
+-- ja que ele esta sendo subtraido por b_in(subtraendo), nesse caso conseguimos cobrir todos os casos de overflow
+-- satisfazendo os resultados esperados e sinalizando corretamente. 
+
+ -- Flag Overflow --------------------------------------
+
+	 IF subtrai(3 downto 0) > a_in THEN  -- Adição
+            flags_out(3) <= '1';
+    ELSE
+            flags_out(3) <= '0';
+    END IF;
+-- Flag Overflow --------------------------------------
+	 
+-- Flag Carry out --------------------------------------  
+	IF subtrai(4) = '1' THEN 
+	 flags_out(2) <= soma(4);
+	ELSE 
+	 flags_out(2) <= '0';
+	END IF;
+-- Flag Carry out --------------------------------------  
+
+
+-- As flags para as funções lógicas funcionam da seguinte forma : 
+-- Os dois bits mais signficativos do resultado, que correspondem 
+-- a flags_out(3) e flags_out(2) receberá um  valor com a seguinte condicao
+-- Se pelo menos uma porta lógica está operando teremos "01"
+-- Se há um numero igual de portas logicas operando teremos "10"
+-- Se todas as portas logicas operam teremos "11"
+-- Se nenhuma porta logica opera teremos "00"
+  ELSIF op_in = "010" THEN
+  
+   result_out(0) <= func_and(0);
+	result_out(1) <= func_and(1);
+	result_out(2) <= func_and(2);
+	result_out(3) <= func_and(3);
+	
+	
+	IF func_and = "0000" THEN
+	    flags_out(2) <= '0';
+		 flags_out(3) <= '0';
+		 flags_out(1) <= '0';
+		 flags_out(0) <= '0';
+	ELSIF func_and = "0001" OR func_and ="0010" OR func_and ="0100"  OR func_and ="0111" OR func_and ="1000" OR func_and ="1011"  OR func_and ="1101" OR func_and ="1110" THEN
+		 flags_out(2) <= '1';
+		 flags_out(3) <= '0';
+		 flags_out(1) <= '0';
+		 flags_out(0) <= '0';
+	ELSIF func_and = "0011" OR func_and ="0110" OR func_and ="1001" OR func_and ="0101" OR func_and ="1010" OR func_and ="1100" THEN 
+	    flags_out(2) <= '0';
+		 flags_out(3) <= '1';
+		 flags_out(1) <= '0';
+		 flags_out(0) <= '0';
+	ELSIF func_and = "1111" THEN
+		 flags_out(2) <= '1';
+		 flags_out(3) <= '1';
+		 flags_out(1) <= '0';
+		 flags_out(0) <= '0';
+	ELSE
+	    flags_out(3) <= '0';
+		 flags_out(2) <= '0';
+		 flags_out(1) <= '0';
+		 flags_out(0) <= '0';
+	END IF;
+  
+  
+	--Portanto atribuimos o valor 011 a operacao logica nand.
+  ELSIF op_in = "011" THEN
+   result_out(0) <= func_nand(0);
+	result_out(1) <= func_nand(1);
+	result_out(2) <= func_nand(2);
+	result_out(3) <= func_nand(3);
+	
+	
+	IF func_nand = "0000" THEN
+	    flags_out(2) <= '0';
+		 flags_out(3) <= '0';
+		 flags_out(1) <= '0';
+		 flags_out(0) <= '0';
+	ELSIF func_nand = "0001" OR func_nand ="0010" OR func_nand ="0100"  OR func_nand ="0111" OR func_nand ="1000" OR func_nand ="1011"  OR func_nand ="1101" OR func_nand ="1110" THEN
+		 flags_out(2) <= '1';
+		 flags_out(3) <= '0';
+		 flags_out(1) <= '0';
+		 flags_out(0) <= '0';
+	ELSIF func_nand = "0011" OR func_nand ="0110" OR func_nand ="1001" OR func_nand ="0101" OR func_nand ="1010" OR func_nand ="1100" THEN 
+	    flags_out(2) <= '0';
+		 flags_out(3) <= '1';
+		 flags_out(1) <= '0';
+		 flags_out(0) <= '0';
+	ELSIF func_nand = "1111" THEN
+		 flags_out(2) <= '1';
+		 flags_out(3) <= '1';
+		 flags_out(1) <= '0';
+		 flags_out(0) <= '0';
+	ELSE
+	    flags_out(3) <= '0';
+		 flags_out(2) <= '0';
+		 flags_out(1) <= '0';
+		 flags_out(0) <= '0';
+	END IF;
+  
+	--Portanto atribuimos o valor 100 a operacao logica or.
+  ELSIF op_in = "100" THEN
+   result_out(0) <= func_or(0);
+	result_out(1) <= func_or(1);
+	result_out(2) <= func_or(2);
+	result_out(3) <= func_or(3);
+	
+	IF func_or = "0000" THEN
+	    flags_out(2) <= '0';
+		 flags_out(3) <= '0';
+		 flags_out(1) <= '0';
+		 flags_out(0) <= '0';
+	ELSIF func_or = "0001" OR func_or ="0010" OR func_or ="0100"  OR func_or ="0111" OR func_or ="1000" OR func_or ="1011"  OR func_or ="1101" OR func_or ="1110" THEN
+		 flags_out(2) <= '1';
+		 flags_out(3) <= '0';
+		 flags_out(1) <= '0';
+		 flags_out(0) <= '0';
+	ELSIF func_or = "0011" OR func_or ="0110" OR func_or ="1001" OR func_or ="0101" OR func_or ="1010" OR func_or ="1100" THEN 
+	    flags_out(2) <= '0';
+		 flags_out(3) <= '1';
+		 flags_out(1) <= '0';
+		 flags_out(0) <= '0';
+	ELSIF func_or = "1111" THEN
+		 flags_out(2) <= '1';
+		 flags_out(3) <= '1';
+		 flags_out(1) <= '0';
+		 flags_out(0) <= '0';
+	ELSE
+	    flags_out(3) <= '0';
+		 flags_out(2) <= '0';
+		 flags_out(1) <= '0';
+		 flags_out(0) <= '0';
+	END IF;
+  
+	--Portanto atribuimos o valor 101 a operacao logica nor.
+  ELSIF op_in = "101" THEN
+   result_out(0) <= func_nor(0);
+	result_out(1) <= func_nor(1);
+	result_out(2) <= func_nor(2);
+	result_out(3) <= func_nor(3);
+	
+	IF func_nor = "0000" THEN
+	    flags_out(2) <= '0';
+		 flags_out(3) <= '0';
+		 flags_out(1) <= '0';
+		 flags_out(0) <= '0';
+	ELSIF func_nor = "0001" OR func_nor ="0010" OR func_nor ="0100"  OR func_nor ="0111" OR func_nor ="1000" OR func_nor ="1011"  OR func_nor ="1101" OR func_nor ="1110" THEN
+		 flags_out(2) <= '1';
+		 flags_out(3) <= '0';
+		 flags_out(1) <= '0';
+		 flags_out(0) <= '0';
+	ELSIF func_nor = "0011" OR func_nor ="0110" OR func_nor ="1001" OR func_nor ="0101" OR func_nor ="1010" OR func_nor ="1100" THEN 
+	    flags_out(2) <= '0';
+		 flags_out(3) <= '1';
+		 flags_out(1) <= '0';
+		 flags_out(0) <= '0';
+	ELSIF func_nor = "1111" THEN
+		 flags_out(2) <= '1';
+		 flags_out(3) <= '1';
+		 flags_out(1) <= '0';
+		 flags_out(0) <= '0';
+	ELSE
+	    flags_out(3) <= '0';
+		 flags_out(2) <= '0';
+		 flags_out(1) <= '0';
+		 flags_out(0) <= '0';
+	END IF;
+	--Portanto atribuimos o valor 110 a operacao logica xor.
+  ELSIF op_in = "110" THEN
+  result_out(0) <= func_xor(0);
+  result_out(1) <= func_xor(1);
+  result_out(2) <= func_xor(2);
+  result_out(3) <= func_xor(3);
+  
+	IF func_xor = "0000" THEN
+	    flags_out(2) <= '0';
+		 flags_out(3) <= '0';
+		 flags_out(1) <= '0';
+		 flags_out(0) <= '0';
+	ELSIF func_xor = "0001" OR func_xor ="0010" OR func_xor ="0100"  OR func_xor ="0111" OR func_xor ="1000" OR func_xor ="1011"  OR func_xor ="1101" OR func_xor ="1110" THEN
+		 flags_out(2) <= '1';
+		 flags_out(3) <= '0';
+		 flags_out(1) <= '0';
+		 flags_out(0) <= '0';
+	ELSIF func_xor = "0011" OR func_xor ="0110" OR func_xor ="1001" OR func_xor ="0101" OR func_xor ="1010" OR func_xor ="1100" THEN 
+	    flags_out(2) <= '0';
+		 flags_out(3) <= '1';
+		 flags_out(1) <= '0';
+		 flags_out(0) <= '0';
+	ELSIF func_xor = "1111" THEN
+		 flags_out(2) <= '1';
+		 flags_out(3) <= '1';
+		 flags_out(1) <= '0';
+		 flags_out(0) <= '0';
+	ELSE
+	    flags_out(3) <= '0';
+		 flags_out(2) <= '0';
+		 flags_out(1) <= '0';
+		 flags_out(0) <= '0';
+	END IF;
+  
+  --Portanto atribuimos o valor 111 a operacao logica xnor.
+  ELSE 
+  result_out(0) <= func_xnor(0);
+  result_out(1) <= func_xnor(1);
+  result_out(2) <= func_xnor(2);
+  result_out(3) <= func_xnor(3);
+  
+	IF func_xnor = "0000" THEN
+	    flags_out(2) <= '0';
+		 flags_out(3) <= '0';
+		 flags_out(1) <= '0';
+		 flags_out(0) <= '0';
+	ELSIF func_xnor = "0001" OR func_xnor ="0010" OR func_xnor ="0100"  OR func_xnor ="0111" OR func_xnor ="1000" OR func_xnor ="1011"  OR func_xnor ="1101" OR func_xnor ="1110" THEN
+		 flags_out(2) <= '1';
+		 flags_out(3) <= '0';
+		 flags_out(1) <= '0';
+		 flags_out(0) <= '0';
+	ELSIF func_xnor = "0011" OR func_xnor ="0110" OR func_xnor ="1001" OR func_xnor ="0101" OR func_xnor ="1010" OR func_xnor ="1100" THEN 
+	    flags_out(2) <= '0';
+		 flags_out(3) <= '1';
+		 flags_out(1) <= '0';
+		 flags_out(0) <= '0';
+	ELSIF func_xnor = "1111" THEN
+		 flags_out(2) <= '1';
+		 flags_out(3) <= '1';
+		 flags_out(1) <= '0';
+		 flags_out(0) <= '0';
+	ELSE
+	    flags_out(3) <= '0';
+		 flags_out(2) <= '0';
+		 flags_out(1) <= '0';
+		 flags_out(0) <= '0';
+	END IF;
+  END IF;
+  
+  
 
  END PROCESS;  
 END Behavioral;
