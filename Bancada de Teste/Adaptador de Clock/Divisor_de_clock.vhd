@@ -13,7 +13,6 @@ ENTITY modulo_divisor_de_clock IS
     PORT (
         clock: IN STD_LOGIC;
         clock_dividido: OUT STD_LOGIC;
-		  detector_de_subida: OUT STD_LOGIC_VECTOR(25 DOWNTO 0)
     );
 END modulo_divisor_de_clock;
 
@@ -22,7 +21,6 @@ ARCHITECTURE bhv OF modulo_divisor_de_clock IS
 -- Estes sinais sao responsaveis por dividir o clock, e realizando a divisao percebemos que precisamos 
 -- de um vetor de 2**26, portanto temos um vetor de 26 bits. 
 	 SIGNAL divide: STD_LOGIC_VECTOR(25 DOWNTO 0) := (OTHERS => '0');
-    SIGNAL conta: STD_LOGIC_VECTOR(25 DOWNTO 0) := (OTHERS => '0');
 	 
 BEGIN
 -- Neste processo sensivel ao clock, a cada clock o sinal divide realiza a contagem preenchendo nosso 
@@ -35,16 +33,5 @@ BEGIN
             divide <= divide + '1';
         END IF;
     END PROCESS;
-	 
-    clock_dividido <= divide(25);
-	 
-	 PROCESS(divide(25))
-	 BEGIN
-	 IF RISING_EDGE(divide(25)) THEN
-			conta <= conta + '1';
-	 END IF;
-	 END PROCESS;
-	 
-	 detector_de_subida <= conta;
 	
 END bhv;
